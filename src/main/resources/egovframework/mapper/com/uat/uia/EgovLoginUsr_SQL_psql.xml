@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="loginDAO">
+
+	<!-- 로그인 처리를 위한 resultMap -->
+	<resultMap id="login" type="egovframework.com.cmm.LoginVO">
+		<result property="id" column="id"/>
+		<result property="name" column="name"/>
+		<result property="ihidNum" column="ihidNum"/>
+		<result property="email" column="email"/>
+		<result property="password" column="password"/>
+		<result property="userSe" column="userSe"/>
+		<result property="orgnztId" column="orgnztId"/>
+		<result property="uniqId" column="uniqId"/>
+		<result property="authorCode" column="authorCode"/>
+		<result property="telNo" column="telNo"/>
+		<result property="mbtlNum" column="mbtlNum"/>
+		<result property="mberSttus" column="mber_sttus"/>
+		<result property="cmpnyId" column="CMPNY_ID"/>
+		<result property="cmpnyNm" column="CMPNY_NM"/>
+		<result property="deptId" column="DEPT_ID"/>
+		<result property="deptNm" column="DEPT_NM"/>
+		<result property="jbttlId" column="JBTTL_ID"/>
+		<result property="jbttlNm" column="JBTTL_NM"/>
+		<result property="ofcpsId" column="OFCPS_ID"/>
+		<result property="ofcpsNm" column="OFCPS_NM"/>
+		<result property="brdt" column="BRDT"/>
+		<result property="jncmpYmd" column="JNCMP_YMD"/>
+	</resultMap>
+
+	<!-- 아이디 찾기를 위한 resultMap -->
+	<resultMap id="id" type="egovframework.com.cmm.LoginVO">
+		<result property="id" column="id"/>
+	</resultMap>
+
+	<!-- 비밀번호 처리를 위한 resultMap -->
+	<resultMap id="password" type="egovframework.com.cmm.LoginVO">
+		<result property="password" column="password"/>
+	</resultMap>
+
+	<!-- SSO용 ESNTL_ID를 이용한 로그인(2011.8.26) -->
+	<select id="ssoLoginByEsntlId" resultMap="login">
+		<!-- 일반회원 -->
+		<if test="userSe != null and userSe == 'GNR'">
+
+			SELECT mber_id AS id
+			     , mber_nm AS name
+			     , ihidNum AS ihidNum
+			     , password AS password
+			     , mber_email_adres AS email
+			     , 'GNR' AS userSe
+			     , '-' AS orgnztId
+			     , ESNTL_ID AS uniqId
+			     , CONCAT(AREA_NO, '-', MIDDLE_TELNO, '-', END_TELNO) AS telNo
+			  FROM COMTNGNRLMBER
+			 WHERE ESNTL_ID = #{uniqId}
+			   AND mber_sttus = 'P'
+
+		</if>
+		<!-- 기업회원 -->
+		<if test="userSe != null and userSe == 'ENT'">
+
+			SELECT ENTRPRS_MBER_ID AS id
+			     , cmpny_nm AS name
+			     , entrprs_mber_password AS password
+			     , bizrno AS ihidNum
+			     , applcnt_email_adres AS email
+			     , 'ENT' AS userSe
+			     , '-' AS orgnztId
+			     , esntl_id AS uniqId
+			     , CONCAT(AREA_NO, '-', ENTRPRS_MIDDLE_TELNO, '-', ENTRPRS_END_TELNO) AS telNo
+			  FROM COMTNENTRPRSMBER
+			 WHERE ESNTL_ID = #{uniqId}
+			   AND entrprs_mber_sttus = 'P'
+
+		</if>
+		<!-- 업무사용자 -->
+		<if test="userSe != null and userSe == 'USR'">
+
+			SELECT emplyr_id AS id
+			     , user_nm AS name
+			     , password AS password
+			     , ihidnum AS ihidNum
+			     , email_adres AS email
+			     , 'USR' AS userSe
+			     , orgnzt_id AS orgnztId
+			     , esntl_id AS uniqId
+			     , CONCAT(AREA_NO, '-', HOUSE_MIDDLE_TELNO, '-', HOUSE_END_TELNO) AS telNo
+			  FROM COMTNEMPLYRINFO
+			 WHERE ESNTL_ID = #{uniqId}
+			   AND emplyr_sttus_code = 'P'
+
+		</if>
+	</select>
+
+
+	<!-- 일반 로그인 -->
+	<select id="actionLogin" resultMap="login">
+		<!-- 일반회원 -->
+		<if test="userSe != null and userSe == 'GNR'">
+			SELECT A.mber_id AS id
+			     , A.mber_nm AS name
+			     , A.password AS password
+			     , A.MBTLNUM as mbtlNum
+			     , A.esntl_id AS uniqId
+			     , B.AUTHOR_CODE as authorCode
+			     , A.mber_sttus
+				 , COALESCE((SELECT DEPT_NM FROM TN_CMMN_DEPT D WHERE D.DEPT_ID = A.DEPT_ID), '부서미지정') AS DEPT_NM
+				 , FNCCOMCODENM(A.JBTTL_ID, 'schdl_mng001') AS JBTTL_NM
+				 , FNCCOMCODENM(A.OFCPS_ID, 'COM105') AS OFCPS_NM
+				 , A.BRDT
+				 , A.JNCMP_YMD
+			  FROM COMTNGNRLMBER A
+			  	   INNER JOIN COMTNEMPLYRSCRTYESTBS B
+			  	      ON A.ESNTL_ID = B.SCRTY_DTRMN_TRGET_ID
+			 WHERE A.mber_id = #{id}
+			   AND A.password = #{password}
+		</if>
+		<!-- 기업회원 -->
+		<if test="userSe != null and userSe == 'ENT'">
+
+			   SELECT A.ENTRPRS_MBER_ID AS id
+			     , A.cmpny_nm AS name
+			     , A.entrprs_mber_password AS password
+			     , A.bizrno AS ihidNum
+			     , A.applcnt_email_adres AS email
+			     , 'ENT' AS userSe
+			     , '-' AS orgnztId
+			     , A.esntl_id AS uniqId
+			     , B.AUTHOR_CODE as authorCode
+			     , A.entrprs_mber_sttus
+			  FROM COMTNENTRPRSMBER A, COMTNEMPLYRSCRTYESTBS B
+			 WHERE A.ENTRPRS_MBER_ID = #{id}
+			   AND A.entrprs_mber_password = #{password}
+			   AND B.SCRTY_DTRMN_TRGET_ID = A.ESNTL_ID
+
+		</if>
+		<!-- 업무사용자 -->
+		<if test="userSe != null and userSe == 'USR'">
+			SELECT A.emplyr_id AS id
+			     , A.user_nm AS name
+			     , A.password AS password
+			     , A.ihidnum AS ihidNum
+			     , A.email_adres AS email
+			     , 'USR' AS userSe
+			     , orgnzt_id AS orgnztId
+			     , A.esntl_id AS uniqId
+			     , B.AUTHOR_CODE as authorCode
+			     , A.emplyr_sttus_code
+			  FROM COMTNEMPLYRINFO A, COMTNEMPLYRSCRTYESTBS B
+			 WHERE A.emplyr_id = #{id}
+			   AND A.password = #{password}
+			  AND B.SCRTY_DTRMN_TRGET_ID = A.ESNTL_ID
+		</if>
+		<!-- 세션리로드용 -->
+		<if test="userSe != null and userSe == 'RE'">
+			<!-- SELECT A.mber_id AS id
+			     , A.mber_nm AS name
+			     , A.ihidNum AS ihidNum
+			     , A.password AS password
+			     , A.mber_email_adres AS email
+			     , CONCAT(A.AREA_NO, '-', A.MIDDLE_TELNO, '-', A.END_TELNO) AS telNo
+			     , A.MBTLNUM as mbtlNum
+			     , 'GNR' AS userSe
+			     , '-' AS orgnztId
+			     , A.esntl_id AS uniqId
+			     , B.AUTHOR_CODE as authorCode
+			  FROM COMTNGNRLMBER A, COMTNEMPLYRSCRTYESTBS B
+			 WHERE A.ESNTL_ID = #{uniqId}
+			   AND A.mber_sttus = 'P'
+			   AND B.SCRTY_DTRMN_TRGET_ID = A.ESNTL_ID -->
+
+			   SELECT A.mber_id AS id
+			     , A.mber_nm AS name
+			     , A.MBTLNUM as mbtlNum
+			     , A.esntl_id AS uniqId
+			     , A.mber_sttus
+			     , B.AUTHOR_CODE as authorCode
+				 , COALESCE((SELECT DEPT_NM FROM TN_CMMN_DEPT D WHERE D.DEPT_ID = A.DEPT_ID), '부서미지정') AS DEPT_NM
+				 , FNCCOMCODENM(A.JBTTL_ID, 'schdl_mng001') AS JBTTL_NM
+				 , FNCCOMCODENM(A.OFCPS_ID, 'COM105') AS OFCPS_NM
+				 , A.BRDT
+				 , A.JNCMP_YMD
+			  FROM COMTNGNRLMBER A
+			  	   INNER JOIN COMTNEMPLYRSCRTYESTBS B
+			  	      ON A.ESNTL_ID = B.SCRTY_DTRMN_TRGET_ID
+			 WHERE A.ESNTL_ID = #{uniqId}
+			   AND A.MBER_STTUS = 'P'
+		</if>
+	</select>
+
+	<!-- 인증서 로그인 -->
+	<select id="actionCrtfctLogin" resultMap="login">
+
+		SELECT emplyr_id AS id
+		     , user_nm AS name
+		     , password AS password
+		     , ihidnum AS ihidNum
+		     , email_adres AS email
+		     , 'USR' AS userSe
+		     , orgnzt_id AS orgnztId
+		     , esntl_id AS uniqId
+		  FROM COMTNEMPLYRINFO
+		 WHERE CRTFC_DN_VALUE = #{dn}
+
+	</select>
+
+	<!-- 아이디 찾기 -->
+	<select id="searchId" resultMap="id">
+		<!-- 일반회원 -->
+		<if test="userSe != null and userSe == 'GNR'">
+
+			SELECT mber_id AS id
+			  FROM COMTNGNRLMBER
+			 WHERE mber_nm = #{name}
+			   AND mber_email_adres = #{email}
+<!-- 			   AND mber_sttus = 'P' -->
+
+		</if>
+		<!-- 기업회원 -->
+		<if test="userSe != null and userSe == 'ENT'">
+
+			SELECT ENTRPRS_MBER_ID AS id
+			  FROM COMTNENTRPRSMBER
+			 WHERE cmpny_nm = #{name}
+			   AND applcnt_email_adres = #{email}
+<!-- 			   AND entrprs_mber_sttus = 'P' -->
+
+		</if>
+		<!-- 업무사용자 -->
+		<if test="userSe != null and userSe == 'USR'">
+
+			SELECT emplyr_id AS id
+			  FROM COMTNEMPLYRINFO
+			 WHERE user_nm = #{name}
+			   AND email_adres = #{email}
+<!-- 			   AND emplyr_sttus_code = 'P' -->
+
+		</if>
+	</select>
+
+	<!-- 비밀번호 찾기 -->
+	<select id="searchPassword" resultMap="password">
+		<!-- 일반회원 -->
+		<if test="userSe != null and userSe == 'GNR'">
+
+			SELECT password AS password
+			  FROM COMTNGNRLMBER
+			 WHERE mber_id = #{id}
+			   AND mber_nm = #{name}
+			   AND mber_email_adres = #{email}
+<!-- 			   AND mber_sttus = 'P' -->
+
+		</if>
+		<!-- 기업회원 -->
+		<if test="userSe != null and userSe == 'ENT'">
+
+			SELECT entrprs_mber_password AS password
+			  FROM COMTNENTRPRSMBER
+			 WHERE ENTRPRS_MBER_ID = #{id}
+			   AND cmpny_nm = #{name}
+			   AND applcnt_email_adres = #{email}
+			   AND entrprs_mber_password_hint = #{passwordHint}
+			   AND entrprs_mber_password_cnsr = #{passwordCnsr}
+<!-- 			   AND entrprs_mber_sttus = 'P' -->
+
+		</if>
+		<!-- 업무사용자 -->
+		<if test="userSe != null and userSe == 'USR'">
+
+			SELECT password AS password
+			  FROM COMTNEMPLYRINFO
+			 WHERE emplyr_id = #{id}
+			   AND user_nm = #{name}
+			   AND email_adres = #{email}
+			   AND password_hint = #{passwordHint}
+			   AND password_cnsr = #{passwordCnsr}
+<!-- 			   AND emplyr_sttus_code = 'P' -->
+
+		</if>
+	</select>
+
+	<!-- 변경된 비밀번호를 저장 -->
+	<update id="updatePassword">
+		<!-- 일반회원 -->
+		<if test="userSe != null and userSe == 'GNR'">
+
+			UPDATE COMTNGNRLMBER
+			   SET password = #{password}
+			 WHERE mber_id = #{id}
+
+		</if>
+		<!-- 기업회원 -->
+		<if test="userSe != null and userSe == 'ENT'">
+
+			UPDATE COMTNENTRPRSMBER
+			   SET entrprs_mber_password = #{password}
+			 WHERE ENTRPRS_MBER_ID = #{id}
+
+		</if>
+		<!-- 업무사용자 -->
+		<if test="userSe != null and userSe == 'USR'">
+
+			UPDATE COMTNEMPLYRINFO
+			   SET password = #{password}
+			 WHERE emplyr_id = #{id}
+
+		</if>
+	</update>
+</mapper>

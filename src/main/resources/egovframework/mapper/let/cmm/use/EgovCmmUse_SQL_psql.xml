@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><!--Converted at: Wed May 11 15:49:39 KST 2016-->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="CmmUseDAO">
+
+	<resultMap id="CmmCodeDetail" type="egovframework.com.cmm.service.CmmnDetailCode">
+		<result property="codeId" column="CODE_ID"/>
+		<result property="code" column="CODE"/>
+		<result property="codeNm" column="CODE_NM"/>
+		<result property="fullName" column="FULL_NAME"/>
+		<result property="codeDc" column="CODE_DC"/>
+	</resultMap>
+
+	<select id="selectCmmCodeDetail" parameterType="ComDefaultCodeVO" resultMap="CmmCodeDetail">
+
+			SELECT
+			CODE_ID, CODE, CONCAT(CODE, ':', CODE_NM) AS FULL_NAME, CODE_DC
+			, CODE_NM
+			FROM
+			COMTCCMMNDETAILCODE
+			WHERE
+			USE_AT = 'Y'
+			AND CODE_ID = #{codeId}
+			<if test='code != null'>
+			AND CODE LIKE CONCAT('%',#{code}, '%')
+			</if>
+			<choose>
+				<when test="codeId == 'COM105' or codeId == 'COM056' or codeId == 'schdl_mng002'">
+					ORDER BY CODE ASC
+				</when>
+				<otherwise>
+					ORDER BY LAST_UPDT_PNTTM DESC
+				</otherwise>
+			</choose>
+	</select>
+
+    <select id="selectOgrnztIdDetail" parameterType="ComDefaultCodeVO" resultMap="CmmCodeDetail">
+
+            SELECT
+                #{tableNm}     CODE_ID,
+                ORGNZT_ID     CODE,
+                ORGNZT_NM     CODE_NM,
+                ORGNZT_DC     CODE_DC
+            FROM
+                COMTNORGNZTINFO
+            WHERE 1=1
+
+            <if test='haveDetailCondition == "Y"'>AND
+                ORGNZT_ID  LIKE  #{detailConditionValue}
+            </if>
+    </select>
+
+    <select id="selectGroupIdDetail" parameterType="ComDefaultCodeVO" resultMap="CmmCodeDetail">
+
+            SELECT
+                #{tableNm}     CODE_ID,
+                GROUP_ID     CODE,
+                GROUP_NM     CODE_NM,
+                GROUP_DC     CODE_DC
+            FROM
+                COMTNAUTHORGROUPINFO
+            WHERE 1=1
+
+            <if test='haveDetailCondition == "Y"'>AND
+                GROUP_ID  LIKE  #{detailConditionValue}
+            </if>
+    </select>
+
+    <select id="selectCmmCodeArrayDetail" parameterType="ComDefaultCodeVO" resultMap="CmmCodeDetail">
+
+			SELECT
+			CODE_ID, CODE, CONCAT(CODE, ':', CODE_NM) AS FULL_NAME, CODE_DC
+			, CODE_NM
+			FROM
+			COMTCCMMNDETAILCODE
+			WHERE
+			USE_AT = 'Y'
+			AND CODE_ID = #{codeId}
+			<if test='code != null'>
+				AND CODE IN
+				<foreach collection="codeArray" item="code" open="(" close=")" separator=",">
+					#{code}
+				</foreach>
+
+			</if>
+
+
+			ORDER BY LAST_UPDT_PNTTM DESC
+	</select>
+
+</mapper>

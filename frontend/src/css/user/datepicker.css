@@ -1,0 +1,21 @@
+.react-datepicker-wrapper {
+    display: inline-block;
+    padding: 0;
+    border: 0;
+    width: 200px;
+}
+
+.react-datepicker__tab-loop {
+    float: left;
+}
+
+.react-datepicker-popper {
+    z-index: 999;
+}
+
+.react-datepicker__header select {
+    width: 70px;
+    margin: 0 1px;
+    background-size: 8px 8px;
+    background-position: calc(100% - 8px) 50%;
+}

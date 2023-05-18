@@ -1,0 +1,7 @@
+.app {
+    height: 100%;
+}
+
+.treeRoot {
+    height: calc(100% - 30px);
+}

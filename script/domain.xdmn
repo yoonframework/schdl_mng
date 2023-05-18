@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<e:DomainDefinition xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:e="http://exerd.tomato.com/model" UUID="DDefinition_kg_jYONsEeu5h7TTt7X2wA" productId="com.tomato.db.postgresql" version="3.3.12.20210311-1507">
+  <domain UUID="Domain_kg_jYeNsEeu5h7TTt7X2wA" name="문자" suggestedDataType="VARCHAR(255)">
+    <domain UUID="Domain_kg_jYuNsEeu5h7TTt7X2wA" name="주민등록번호" suggestedDataType="VARCHAR(13)"/>
+    <domain UUID="Domain_kg_jY-NsEeu5h7TTt7X2wA" comment="사람이 살고 있는 곳이나 기관, 회사 따위가 자리 잡고 있는 곳을 행정 구역으로 나타낸 이름. 실질적인 생활의 근거가 되는 장소" name="주소" suggestedDataType="VARCHAR(200)"/>
+    <domain UUID="Domain_kg_jZONsEeu5h7TTt7X2wA" name="웹주소"/>
+    <domain UUID="Domain_kg_jZeNsEeu5h7TTt7X2wA" name="전화번호" suggestedDataType="VARCHAR(13)"/>
+    <domain UUID="Domain_kg_jZuNsEeu5h7TTt7X2wA" comment="컴퓨터 통신망을 통해서 메시지를 전송하는 것,또는 전송된 메시지" name="이메일" suggestedDataType="VARCHAR(100)"/>
+    <domain UUID="Domain_kg_jZ-NsEeu5h7TTt7X2wA" name="이름" suggestedDataType="VARCHAR(50)"/>
+    <domain UUID="Domain_kg_jaONsEeu5h7TTt7X2wA" name="사업자번호" suggestedDataType="VARCHAR(12)"/>
+    <domain UUID="Domain_kg_jaeNsEeu5h7TTt7X2wA" name="이름-사람" suggestedDataType="VARCHAR(50)"/>
+    <domain UUID="Domain_kg_jauNsEeu5h7TTt7X2wA" name="이름-사물" suggestedDataType="VARCHAR(100)"/>
+    <domain UUID="Domain_kg_ja-NsEeu5h7TTt7X2wA" name="이름-목록"/>
+    <domain UUID="Domain_kg_jbONsEeu5h7TTt7X2wA" name="첨부파일" suggestedDataType="TEXT">
+      <domain UUID="Domain_kg_jbeNsEeu5h7TTt7X2wA" name="첨부파일-단일" suggestedDataType="VARCHAR(20)"/>
+    </domain>
+    <domain UUID="Domain_kg_jbuNsEeu5h7TTt7X2wA" name="코드" suggestedDataType="VARCHAR(15)"/>
+    <domain UUID="Domain_kg_jb-NsEeu5h7TTt7X2wA" name="코드명" suggestedDataType="VARCHAR(50)"/>
+    <domain UUID="Domain_kg_jcONsEeu5h7TTt7X2wA" name="텍스트" suggestedDataType="TEXT"/>
+    <domain UUID="Domain_kg_jceNsEeu5h7TTt7X2wA" name="여부" suggestedDataType="CHAR(1)"/>
+    <domain UUID="Domain_kg_jcuNsEeu5h7TTt7X2wA" name="문자-소" suggestedDataType="VARCHAR(50)"/>
+    <domain UUID="Domain_kg_jc-NsEeu5h7TTt7X2wA" name="문자-중" suggestedDataType="VARCHAR(100)"/>
+    <domain UUID="Domain_kg_jdONsEeu5h7TTt7X2wA" name="문자-대"/>
+    <domain UUID="Domain_kg_jdeNsEeu5h7TTt7X2wA" name="도메인"/>
+    <domain UUID="Domain_kg_jduNsEeu5h7TTt7X2wA" name="년도" suggestedDataType="CHAR(4)"/>
+    <domain UUID="Domain_kg_jd-NsEeu5h7TTt7X2wA" name="문자-특대" suggestedDataType="VARCHAR(1000)"/>
+  </domain>
+  <domain UUID="Domain_kg_jeONsEeu5h7TTt7X2wA" name="숫자" suggestedDataType="NUMERIC">
+    <domain UUID="Domain_kg_jeeNsEeu5h7TTt7X2wA" name="금액" suggestedDataType="NUMERIC(20)"/>
+    <domain UUID="Domain_kg_jeuNsEeu5h7TTt7X2wA" name="번호" suggestedDataType="NUMERIC"/>
+    <domain UUID="Domain_kg_je-NsEeu5h7TTt7X2wA" name="인원" suggestedDataType="NUMERIC(5)"/>
+    <domain UUID="Domain_kg_jfONsEeu5h7TTt7X2wA" name="좌표" suggestedDataType="NUMERIC"/>
+    <domain UUID="Domain_kg_jfeNsEeu5h7TTt7X2wA" name="정원" suggestedDataType="NUMERIC(3)"/>
+    <domain UUID="Domain_kg_jfuNsEeu5h7TTt7X2wA" name="점수" suggestedDataType="NUMERIC(3)"/>
+    <domain UUID="Domain_kg_jf-NsEeu5h7TTt7X2wA" name="수량" suggestedDataType="NUMERIC(5)"/>
+    <domain UUID="Domain_kg_jgONsEeu5h7TTt7X2wA" name="별점" suggestedDataType="NUMERIC(1)"/>
+    <domain UUID="Domain_kg_jgeNsEeu5h7TTt7X2wA" name="순번" suggestedDataType="NUMERIC(20)"/>
+  </domain>
+  <domain UUID="Domain_kg_jguNsEeu5h7TTt7X2wA" name="객체">
+    <domain UUID="Domain_kg_jg-NsEeu5h7TTt7X2wA" name="이미지"/>
+    <domain UUID="Domain_kg_jhONsEeu5h7TTt7X2wA" name="오디오"/>
+  </domain>
+  <domain UUID="Domain_kg_jheNsEeu5h7TTt7X2wA" name="날짜" suggestedDataType="DATE">
+    <domain UUID="Domain_kg_jhuNsEeu5h7TTt7X2wA" name="일자" suggestedDataType="VARCHAR(8)"/>
+    <domain UUID="Domain_kg_jh-NsEeu5h7TTt7X2wA" name="시간" suggestedDataType="VARCHAR(5)"/>
+    <domain UUID="Domain_kg_jiONsEeu5h7TTt7X2wA" name="시점" suggestedDataType="TIMESTAMP"/>
+    <domain UUID="Domain_kg_jieNsEeu5h7TTt7X2wA" name="일시" suggestedDataType="VARCHAR(16)"/>
+    <domain UUID="Domain_kg_jiuNsEeu5h7TTt7X2wA" name="기간-년" suggestedDataType="CHAR(2)"/>
+    <domain UUID="Domain_kg_ji-NsEeu5h7TTt7X2wA" name="년월" suggestedDataType="VARCHAR(6)"/>
+  </domain>
+  <domain UUID="Domain_kg_jjONsEeu5h7TTt7X2wA" name="아이디" suggestedDataType="VARCHAR(20)"/>
+</e:DomainDefinition>

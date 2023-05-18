@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.2.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="레이어_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	 y="0px" viewBox="0 0 118 106.4" style="enable-background:new 0 0 118 106.4;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#ABC5E3;stroke:#38393A;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+	.st1{fill:#FFFFFF;stroke:#38393A;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+	.st2{fill:none;stroke:#38393A;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+	.st3{fill:#FFFFFF;stroke:#38383B;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st4{fill:none;stroke:#38383B;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st5{fill:#ABC5E3;stroke:#365587;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+	.st6{fill:#DADAE0;}
+	.st7{fill:#FFFFFF;}
+</style>
+<g>
+	<g>
+		<g>
+			<path class="st3" d="M1.8,61.1V31.2c0-4.6,3.8-8.4,8.4-8.4l22.3,0l28,20.8c2.1,1.6,2.5,4.5,1,6.6l0,0c-1.6,2.1-4.5,2.5-6.6,1
+				l-22.9-17"/>
+			<g>
+				<path class="st4" d="M27.3,10.1c0,4.6-3.8,8.4-8.4,8.4c-4.6,0-8.4-3.8-8.4-8.4c0-4.6,3.8-8.4,8.4-8.4
+					C23.5,1.8,27.3,5.5,27.3,10.1z"/>
+				<polyline class="st3" points="8.9,38.1 8.9,104.6 18.7,104.6 18.7,70.3 18.7,104.6 28.5,104.6 28.5,38.1 				"/>
+			</g>
+		</g>
+		<g>
+			<path class="st3" d="M116.2,61.1V31.2c0-4.6-3.8-8.4-8.4-8.4l-22.3,0l-28,20.8c-2.1,1.6-2.5,4.5-1,6.6l0,0c1.6,2.1,4.5,2.5,6.6,1
+				l22.9-17"/>
+			<g>
+				<path class="st4" d="M90.7,10.1c0,4.6,3.8,8.4,8.4,8.4c4.6,0,8.4-3.8,8.4-8.4c0-4.6-3.8-8.4-8.4-8.4
+					C94.5,1.8,90.7,5.5,90.7,10.1z"/>
+				<polyline class="st3" points="109.1,38.1 109.1,104.6 99.3,104.6 99.3,70.3 99.3,104.6 89.5,104.6 89.5,38.1 				"/>
+			</g>
+		</g>
+	</g>
+	<g>
+		<polygon class="st0" points="73.9,67 73.9,88 66.3,97.2 66.3,74.2 		"/>
+		<rect x="41" y="74" class="st0" width="25.4" height="23.2"/>
+		<polygon class="st0" points="66.3,74.1 41,74.1 48.5,67 73.9,67 		"/>
+	</g>
+</g>
+</svg>

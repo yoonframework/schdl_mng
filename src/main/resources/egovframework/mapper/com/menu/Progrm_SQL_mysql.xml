@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ProgramDAO">
+	<!-- 메뉴 맵 -->
+	<resultMap id="menuInfoMap" type="MenuInfoVO">
+		<result property="id" column="ID"/>
+		<result property="menuNo" column="MENU_NO"/>
+		<result property="pId" column="PID"/>
+		<result property="upperMenuNo" column="UPPER_MENU_NO"/>
+		<result property="menuNm" column="MENU_NM"/>
+		<result property="menuOrdr" column="MENU_ORDR"/>
+		<result property="menuDc" column="MENU_DC"/>
+		<result property="relateImage" column="RELATE_IMAGE"/>
+		<result property="progrGb" column="PROGR_GB"/>
+		<result property="menuGb" column="MENU_GB"/>
+		<result property="useYn" column="USE_YN"/>
+		<collection property="menuProgramList" ofType="MenuProgramInfoVO">
+			<result property="menuNo" column="PRO_MENU_NO"/>
+			<result property="proId" column="PRO_ID"/>
+			<result property="progrUrl" column="PROGR_URL"/>
+			<result property="progrUrlNm" column="PROGR_URL_NM"/>
+			<result property="defaultYn" column="DEFAULT_YN"/>
+		</collection>
+		<collection property="menuFunctionList" ofType="MenuFunctionInfoVO">
+			<result property="menuNo" column="FUNC_MENU_NO"/>
+			<result property="funcId" column="FUNC_ID"/>
+			<result property="functionCode" column="FUNCTION_CODE"/>
+			<result property="functionNm" column="FUNCTION_NM"/>
+		</collection>
+	</resultMap>
+
+	<!-- 메뉴 정보 삭제 -->
+	<delete id="deleteMenuInfo" parameterType="MenuInfoVO">
+		DELETE FROM TNMENUINFO
+		 WHERE 1 = 1
+		   AND MENU_NO = #{menuNo}
+	</delete>
+
+	<!-- 메뉴 프로그램 정보 삭제 -->
+	<delete id="deleteMenuProgramInfo" parameterType="MenuProgramInfoVO">
+		DELETE FROM TNMENUPROGRAMINFO
+		 WHERE 1 = 1
+		<choose>
+			<when test="progrUrl != '' and progrUrl != null">
+				AND MENU_NO = #{menuNo}
+		   		AND PROGR_URL = #{progrUrl}
+			</when>
+			<otherwise>
+				AND MENU_NO = #{menuNo}
+			</otherwise>
+		</choose>
+	</delete>
+
+	<!-- 메뉴 프로그램 이동 시 수정 -->
+	<update id="moveMenuInfo" parameterType="MenuInfoVO">
+		UPDATE TNMENUINFO
+		   SET UPPER_MENU_NO = #{upperMenuNo}
+		     , MENU_ORDR = #{menuOrdr}
+		 WHERE 1 = 1
+		   AND MENU_NO = #{menuNo}
+	</update>
+
+	<!-- 트리에서 메뉴 추가 시 등록 -->
+	<insert id="insertTreeMenuInfo" parameterType="MenuInfoVO">
+		INSERT INTO TNMENUINFO (
+			MENU_NO
+			, UPPER_MENU_NO
+			, MENU_NM
+			, MENU_ORDR
+			, MENU_GB
+			, FRST_REGISTER_ID
+			, FRST_REGIST_PNTTM
+		) VALUES (
+			#{menuNo}
+			, #{upperMenuNo}
+			, #{menuNm}
+			, (
+				SELECT COUNT(B.MENU_NO)+1 AS MENU_ORDR
+		     	  FROM TNMENUINFO B
+		    	 WHERE 1 = 1
+		      	   AND B.UPPER_MENU_NO = #{upperMenuNo}
+			  )
+			, #{menuGb}
+			, #{frstRegisterId}
+			, NOW()
+		)
+	</insert>
+
+	<!-- 트리에서 메뉴 명 변경 시 수정 -->
+	<update id="updateNewnNameTreeMenuInfo" parameterType="MenuInfoVO">
+		UPDATE TNMENUINFO
+		   SET MENU_NM = #{menuNm}
+		 WHERE 1 = 1
+		   AND MENU_NO = #{menuNo}
+	</update>
+
+	<select id="selectMenuInfo" parameterType="MenuInfoVO" resultMap="menuInfoMap">
+		SELECT A.MENU_NO
+		     , A.UPPER_MENU_NO
+		     , A.MENU_NM
+		     , A.MENU_ORDR
+		     , A.MENU_DC
+		     , A.RELATE_IMAGE
+		     , A.PROGR_GB
+		     , A.MENU_GB
+		     , A.USE_YN
+		     , B.MENU_NO AS PRO_MENU_NO
+		     , B.PROGR_URL
+		     , B.PROGR_URL_NM
+		     , B.DEFAULT_YN
+		     , C.MENU_NO AS FUNC_MENU_NO
+		     , C.FUNCTION_CODE
+		     , C.FUNCTION_NM
+		  FROM TNMENUINFO A
+		       LEFT OUTER JOIN TNMENUPROGRAMINFO B
+		         ON B.MENU_NO = A.MENU_NO
+		       LEFT OUTER JOIN TNMENUFUNCTIONINFO C
+		         ON C.MENU_NO = A.MENU_NO
+		 WHERE 1 = 1
+		   AND A.MENU_NO = #{menuNo}
+		 ORDER BY A.MENU_ORDR
+		        , (
+	    			CASE B.DEFAULT_YN WHEN 'Y' THEN 1
+	         		ELSE 2
+	    			END
+	  			  )
+	</select>
+
+	<!-- 프로그램 메뉴 등록 -->
+	<insert id="insertMenuInfo" parameterType="MenuInfoVO">
+		INSERT INTO TNMENUINFO (
+			MENU_NO
+			, UPPER_MENU_NO
+			, MENU_NM
+			, MENU_ORDR
+			, MENU_DC
+			, RELATE_IMAGE
+			, PROGR_GB
+			, MENU_GB
+			, FRST_REGISTER_ID
+			, FRST_REGIST_PNTTM
+			, LAST_UPDUSR_ID
+			, LAST_UPDT_PNTTM
+		) VALUES (
+			#{menuNo}
+			, #{upperMenuNo}
+			, #{menuNm}
+			, #{menuOrdr}
+			, #{menuDc}
+			, #{relateImage}
+			, #{progrGb}
+			, #{menuGb}
+			, #{frstRegisterId}
+			, NOW()
+			, #{lastUpdusrId}
+			, NOW()
+		)
+	</insert>
+
+	<!-- 프로그램 Url 등록 -->
+	<insert id="insertMenuProgramInfo" parameterType="MenuProgramInfoVO">
+		INSERT INTO TNMENUPROGRAMINFO (
+			MENU_NO
+			, PROGR_URL
+			, PROGR_URL_NM
+			, DEFAULT_YN
+			, FRST_REGISTER_ID
+			, FRST_REGIST_PNTTM
+			, LAST_UPDUSR_ID
+			, LAST_UPDT_PNTTM
+		)
+		VALUES(
+			#{menuNo}
+			, #{progrUrl}
+			, #{progrUrlNm}
+			, #{defaultYn}
+			, #{frstRegisterId}
+			, NOW()
+			, #{lastUpdusrId}
+			, now()
+		)
+		ON DUPLICATE KEY UPDATE
+			PROGR_URL_NM = #{progrUrlNm}
+			, DEFAULT_YN = #{defaultYn}
+			, LAST_UPDUSR_ID = #{lastUpdusrId}
+			, LAST_UPDT_PNTTM = NOW()
+	</insert>
+
+	<!-- 프로그램 메뉴 수정 -->
+	<update id="updateMenuInfo" parameterType="MenuInfoVO">
+		UPDATE TNMENUINFO
+		   SET MENU_NM = #{menuNm}
+		     , MENU_ORDR = #{menuOrdr}
+		     , MENU_DC = #{menuDc}
+		     , RELATE_IMAGE = #{relateImage}
+		     , PROGR_GB = #{progrGb}
+		     , MENU_GB = #{menuGb}
+		     , USE_YN = #{useYn}
+		     , LAST_UPDUSR_ID = #{lastUpdusrId}
+			 , LAST_UPDT_PNTTM = NOW()
+		 WHERE 1 = 1
+		   AND MENU_NO = #{menuNo}
+	</update>
+
+	<!-- 게시판 목록을 조회 -->
+<!-- 	<select id="selectBbsList" parameterType="egovframework.com.cmm.ComDefaultVO" resultType="egovframework.com.cop.bbs.service.BoardVO"> -->
+<!-- 		<![CDATA[ -->
+<!-- 			SELECT -->
+<!-- 				a.BBS_ID, -->
+<!-- 				a.BBS_NM, -->
+<!-- 				a.BBS_INTRCN, -->
+<!-- 				a.BBS_TY_CODE -->
+<!-- 			FROM -->
+<!-- 				COMTNBBSMASTER a -->
+<!-- 			WHERE 1 = 1 -->
+<!-- 			AND   a.BBS_NM LIKE CONCAT('%', #{searchKeyword}, '%') -->
+<!-- 			ORDER BY a.FRST_REGIST_PNTTM DESC -->
+<!-- 			LIMIT  #{recordCountPerPage} OFFSET #{firstIndex} -->
+<!-- 		 ]]> -->
+<!-- 	</select> -->
+
+	<!-- 게시판 목록 수를 조회 -->
+	<select id="selectBbsListTotCnt" parameterType="egovframework.com.cmm.ComDefaultVO" resultType="java.lang.Integer">
+		<![CDATA[
+			SELECT  COUNT(*) AS totcnt
+			FROM    COMTNBBSMASTER A
+			WHERE 	A.BBS_NM like  CONCAT('%', #{searchKeyword}, '%')
+			AND		A.USE_AT = 'Y'
+		]]>
+	</select>
+
+	<!-- 메뉴 기능코드 중복체크 -->
+	<select id="selectDuplicateFunctionCode" parameterType="MenuFunctionInfoVO" resultType="java.lang.Integer">
+		<![CDATA[
+			SELECT COUNT(FUNCTION_CODE) AS CNT
+			  FROM TNMENUFUNCTIONINFO
+			 WHERE 1 = 1
+			   AND FUNCTION_CODE = #{functionCode}
+			   AND MENU_NO = #{menuNo}
+		]]>
+	</select>
+
+	<!-- 메뉴 기능정보 등록 -->
+	<insert id="insertMenuFunctionInfo" parameterType="MenuFunctionInfoVO">
+		INSERT INTO TNMENUFUNCTIONINFO (
+			MENU_NO
+			, FUNCTION_CODE
+			, FUNCTION_NM
+			, FRST_REGISTER_ID
+			, FRST_REGIST_PNTTM
+			, LAST_UPDUSR_ID
+			, LAST_UPDT_PNTTM
+		)
+		VALUES(
+			#{menuNo}
+			, #{functionCode}
+			, #{functionNm}
+			, #{frstRegisterId}
+			, NOW()
+			, #{lastUpdusrId}
+			, NOW()
+		)
+		ON DUPLICATE KEY UPDATE
+			FUNCTION_NM = #{functionNm}
+			, LAST_UPDUSR_ID = #{lastUpdusrId}
+			, LAST_UPDT_PNTTM = now()
+	</insert>
+
+	<!-- 메뉴 기능 정보 삭제 -->
+	<delete id="deleteMenuFunctionInfo" parameterType="MenuFunctionInfoVO">
+		DELETE FROM TNMENUFUNCTIONINFO
+		 WHERE 1 = 1
+		<choose>
+			<when test="functionCode != '' and functionCode != null">
+				AND MENU_NO = #{menuNo}
+		   		AND FUNCTION_CODE = #{functionCode}
+			</when>
+			<otherwise>
+				AND MENU_NO = #{menuNo}
+			</otherwise>
+		</choose>
+	</delete>
+</mapper>

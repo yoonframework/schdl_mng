@@ -1,0 +1,532 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mberManageDAO">
+
+    <resultMap id="stplatMap" type="egovframework.com.uss.umt.service.StplatVO">
+        <result property="useStplatId" column="USE_STPLAT_ID"/>
+        <result property="useStplatCn" column="USE_STPLAT_CN"/>
+        <result property="infoProvdAgeCn" column="INFO_PROVD_AGRE_CN"/>
+    </resultMap>
+
+    <!-- 사용자 정보 조회 -->
+    <resultMap id="MberManageMap" type="egovframework.com.uss.umt.service.MberManageVO">
+		<id property="uniqId" column="uniqId"/>
+		<result property="userTy" column="userTy"/>
+		<result property="mberId" column="mberId"/>
+		<result property="mberNm" column="mberNm"/>
+		<result property="nmplt" column="nmplt"/>
+		<result property="password" column="PASSWORD"/>
+		<result property="passwordHint" column="passwordHint"/>
+		<result property="passwordCnsr" column="passwordCnsr"/>
+		<result property="ihidnum" column="ihidnum"/>
+		<result property="sexdstnCode" column="sexdstnCode"/>
+		<result property="zip" column="zip"/>
+		<result property="adres" column="adres"/>
+		<result property="areaNo" column="areaNo"/>
+		<result property="mberSttus" column="mberSttus"/>
+		<result property="detailAdres" column="detailAdres"/>
+		<result property="endTelno" column="endTelno"/>
+		<result property="moblphonNo" column="moblphonNo"/>
+		<result property="groupId" column="groupId"/>
+		<result property="mberFxnum" column="mberFxnum"/>
+		<result property="mberEmailAdres" column="mberEmailAdres"/>
+		<result property="middleTelno" column="middleTelno"/>
+		<result property="sbscrbDe" column="sbscrbDe"/>
+		<result property="cmpnyId" column="cmpnyId"/>
+		<result property="deptId" column="deptId"/>
+		<result property="deptNm" column="deptNm"/>
+		<result property="ofcpsId" column="ofcpsId"/>
+		<result property="ofcpsNm" column="ofcpsNm"/>
+		<result property="fileId" column="fileId"/>
+		<result property="authorCode" column="authorCode"/>
+		<result property="jbttlId" column="jbttlId"/>
+		<result property="jbttlNm" column="jbttlNm"/>
+		<result property="brdt" column="brdt"/>
+		<result property="jncmpYmd" column="jncmpYmd"/>
+		<result property="workStle" column="workStle"/>
+		<result property="workStleNm" column="workStleNm"/>
+		<collection property="functionList" ofType="FunctionAuthoInfoVO">
+			<id property="fncAuthorSeq" column="fncAuthorSeq"/>
+			<result property="functionCode" column="functionCode"/>
+			<association property="menuNo" javaType="MenuInfoVO">
+				<result property="menuNo" column="menuNo"/>
+			</association>
+		</collection>
+		<collection property="crqfcList" ofType="CrqfcMngVO">
+			<id property="crqfcId" column="crqfcId"/>
+			<result property="crqfcNm" column="crqfcNm"/>
+			<result property="crqfcIssuinst" column="crqfcIssuinst"/>
+			<result property="crqfcUpdtYmd" column="crqfcUpdtYmd"/>
+			<result property="crqfcIssuYmd" column="crqfcIssuYmd"/>
+			<result property="rm" column="rm"/>
+			<result property="empId" column="empId"/>
+		</collection>
+	</resultMap>
+
+	<!-- 사용자 기능권한 조회 -->
+	<resultMap id="menuFunctionInfoMap" type="MenuInfoVO">
+		<result property="menuNo" column="MENU_NO"/>
+		<result property="upperMenuNo" column="UPPER_MENU_NO"/>
+		<result property="menuNm" column="MENU_NM"/>
+		<result property="menuOrdr" column="MENU_ORDR"/>
+		<result property="menuDc" column="MENU_DC"/>
+		<result property="relateImage" column="RELATE_IMAGE"/>
+		<result property="progrGb" column="PROGR_GB"/>
+		<result property="menuGb" column="MENU_GB"/>
+		<result property="useYn" column="USE_YN"/>
+		<collection property="menuFunctionList" ofType="MenuFunctionInfoVO">
+			<result property="menuNo" column="FUNCTION_MENU_NO"/>
+			<result property="functionCode" column="FUNCTION_CODE"/>
+			<result property="functionNm" column="FUNCTION_NM"/>
+			<result property="menuNm" column="FUNCTION_MENU_NM"/>
+		</collection>
+	</resultMap>
+
+	<!-- 일반회원목록 조회 -->
+	<select id="selectMberList" resultMap="MberManageMap">
+		SELECT "uniqId"
+			 , "userTy"
+   			 , "mberId"
+   			 , "mberNm"
+   			 , "nmplt"
+   			 , "ofcpsId"
+   			 , "mberEmailAdres"
+   			 , "moblphonNo"
+   			 , "mberSttus"
+   			 , "sbscrbDe"
+   			 , "deptId"
+   			 , "authorCode"
+   			 , "crqfcId"
+			 , "crqfcNm"
+			 , "crqfcIssuinst"
+			 , "crqfcUpdtYmd"
+			 , "crqfcIssuYmd"
+			 , "rm"
+			 , "empId"
+			 , "deptNm"
+			 , "jbttlId"
+			 , "jbttlNm"
+			 , "brdt"
+			 , "jncmpYmd"
+			 , "workStle"
+			 , "workStleNm"
+		  FROM (
+		  		SELECT A.ESNTL_ID 							"uniqId"
+		  			 , A.MBER_ID							"mberId"
+		  			 , A.MBER_NM            				"mberNm"
+		  			 , CONCAT(
+		  			 	A.MBER_NM, ' ',
+		  			 	COALESCE(FNCCOMCODENM(A.OFCPS_ID, 'COM105'), ''), ' ',
+		  			 	'(' , COALESCE(D.DEPT_NM, '-'), ')'
+		  			 ) 					    				"nmplt"
+		  			 , A.OFCPS_ID							"ofcpsId"
+		  			 , A.MBER_EMAIL_ADRES 	  				"mberEmailAdres"
+		  			 , A.MBTLNUM		   				 	"moblphonNo"
+		  			 , A.MBER_STTUS         				"mberSttus"
+		  			 , A.SBSCRB_DE         				 	"sbscrbDe"
+		  			 , A.DEPT_ID          					"deptId"
+		  			 , B.MBER_TY_CODE						"userTy"
+		  			 , B.AUTHOR_CODE						"authorCode"
+		  			 , C.CRQFC_ID							"crqfcId"
+					 , C.CRQFC_NM							"crqfcNm"
+					 , C.CRQFC_ISSUINST						"crqfcIssuinst"
+					 , TRIM(C.CRQFC_UPDT_YMD) "crqfcUpdtYmd"
+					 , TRIM(C.CRQFC_ISSU_YMD) "crqfcIssuYmd"
+					 , C.RM									"rm"
+				 	 , C.EMP_ID								"empId"
+					 , D.DEPT_NM          					"deptNm"
+					 , A.JBTTL_ID							"jbttlId"
+					 , FNCCOMCODENM(A.JBTTL_ID, 'schdl_mng001') 	"jbttlNm"
+					 , A.BRDT								"brdt"
+					 , A.JNCMP_YMD							"jncmpYmd"
+					 , A.WORK_STLE							"workStle"
+					 , FNCCOMCODENM(A.WORK_STLE, 'schdl_mng002')	"workStleNm"
+		  		  FROM (
+		  		  			SELECT ESNTL_ID
+		  			 			 , MBER_ID
+		  			 			 , MBER_NM
+					  			 , OFCPS_ID
+					  			 , MBER_EMAIL_ADRES
+					  			 , MBTLNUM
+					  			 , MBER_STTUS
+					  			 , SBSCRB_DE
+					  			 , DEPT_ID
+					  			 , JBTTL_ID
+					  			 , BRDT
+					  			 , JNCMP_YMD
+					  			 , WORK_STLE
+		  		  			  FROM COMTNGNRLMBER
+		  		  			 WHERE 1=1
+		  		  			   AND MBER_ID != 'master'
+		  		  			   AND MBER_ID != 'USER'
+		  		  			   <if test='sbscrbSttus != null and sbscrbSttus neq "0" and sbscrbSttus neq ""'>
+									AND DEPT_ID LIKE  #{sbscrbSttus}
+								</if>
+								<if test="@egovframework.com.cmm.util.EgovMybaitsUtil@isNotEmpty(searchKeyword)">
+									<if test="searchCondition == 99">
+										AND (MBER_ID LIKE CONCAT('%', #{searchKeyword}, '%') or MBER_NM LIKE CONCAT('%', #{searchKeyword}, '%'))
+									</if>
+									<if test="searchCondition == 0">
+										AND MBER_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+									</if>
+									<if test="searchCondition == 1">
+										AND MBER_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+									</if>
+								</if>
+		  		  			 ORDER BY CASE WHEN MBER_STTUS = 'A' THEN 1 WHEN MBER_STTUS = 'P' THEN 2 ELSE 3 END ASC, OFCPS_ID ASC, MBER_NM ASC
+				 			 LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+		  		  		) A
+		  		  	   LEFT OUTER JOIN COMTNEMPLYRSCRTYESTBS B
+		  		  	     ON A.ESNTL_ID = B.SCRTY_DTRMN_TRGET_ID
+		  		  	   LEFT OUTER JOIN TN_EMP_CRQFC_MNG C
+		  		  	     ON A.ESNTL_ID = C.EMP_ID
+		  		  	   LEFT OUTER JOIN TN_CMMN_DEPT D
+		  		  	     ON A.DEPT_ID = D.DEPT_ID
+		  		 WHERE 1=1
+		  ) T
+	 	 WHERE 1=1
+	 	 ORDER BY T."ofcpsId" ASC, T."mberNm" ASC
+	</select>
+
+	<!-- 일반회원목록 건수 조회 -->
+	<select id="selectMberListTotCnt" resultType="int">
+		SELECT COUNT(*) AS TOT_CNT
+		  FROM (
+		  		SELECT A.ESNTL_ID 			"uniqId"
+		  			 , A.MBER_ID			"mberId"
+		  			 , A.MBER_NM            "mberNm"
+		  			 , A.MBER_EMAIL_ADRES   "mberEmailAdres"
+		  			 , A.MBTLNUM		    "moblphonNo"
+		  			 , A.MBER_STTUS         "mberSttus"
+		  			 , A.SBSCRB_DE          "sbscrbDe"
+		  		  FROM COMTNGNRLMBER A
+		  		 WHERE 1=1
+		  		   AND A.MBER_ID != 'master'
+		  		   AND A.MBER_ID != 'USER'
+		  		<if test='sbscrbSttus != null and sbscrbSttus neq "0" and sbscrbSttus neq ""'>
+					AND DEPT_ID LIKE  #{sbscrbSttus}
+				</if>
+				<if test="@egovframework.com.cmm.util.EgovMybaitsUtil@isNotEmpty(searchKeyword)">
+					<if test="searchCondition == 99">
+						AND (A.MBER_ID LIKE CONCAT('%', #{searchKeyword}, '%') or A.MBER_NM LIKE CONCAT('%', #{searchKeyword}, '%'))
+					</if>
+					<if test="searchCondition == 0">
+						AND A.MBER_ID LIKE CONCAT('%', #{searchKeyword}, '%')
+					</if>
+					<if test="searchCondition == 1">
+						AND A.MBER_NM LIKE CONCAT('%', #{searchKeyword}, '%')
+					</if>
+				</if>
+		  ) A
+	 	 WHERE 1=1
+	</select>
+
+    <insert id="insertMber_S">
+
+            INSERT INTO COMTNGNRLMBER
+                (
+                    ESNTL_ID          ,
+                    MBER_ID          ,
+                    MBER_NM          ,
+                    PASSWORD         ,
+                    PASSWORD_HINT    ,
+                    PASSWORD_CNSR    ,
+                    IHIDNUM          ,
+                    SEXDSTN_CODE     ,
+                    ZIP              ,
+                    ADRES            ,
+                    AREA_NO          ,
+                    MBER_STTUS       ,
+                    DETAIL_ADRES     ,
+                    END_TELNO        ,
+                    MBTLNUM      ,
+                    GROUP_ID         ,
+                    MBER_FXNUM       ,
+                    MBER_EMAIL_ADRES ,
+                    MIDDLE_TELNO     ,
+                    SBSCRB_DE,
+                    CMPNY_ID,
+                    DEPT_ID,
+                    OFCPS_ID,
+                    FILE_ID,
+                    JBTTL_ID,
+                    BRDT,
+                    JNCMP_YMD,
+                    WORK_STLE
+                     )
+              VALUES(
+                    #{uniqId},
+                    #{mberId},
+                    #{mberNm},
+                    #{password},
+                    #{passwordHint},
+                    #{passwordCnsr},
+                    #{ihidnum},
+                    #{sexdstnCode},
+                    #{zip},
+                    #{adres},
+                    #{areaNo},
+                    #{mberSttus},
+                    #{detailAdres},
+                    #{endTelno},
+                    #{moblphonNo},
+                    #{groupId},
+                    #{mberFxnum},
+                    #{mberEmailAdres},
+                    #{middleTelno},
+                    now(),
+                    'ROOT',
+                    #{deptId},
+                    #{ofcpsId},
+                    #{fileId},
+                    #{jbttlId},
+                    #{brdt},
+                    #{jncmpYmd},
+                    #{workStle}
+                    )
+
+    </insert>
+
+    <delete id="deleteMber_S">
+
+            DELETE FROM COMTNGNRLMBER
+            WHERE ESNTL_ID=#{delId}
+
+    </delete>
+
+<!--     <select id="selectMber_S" resultType="egovframework.com.uss.umt.service.MberManageVO"> -->
+    <select id="selectMber_S" resultMap="MberManageMap">
+            SELECT A.ESNTL_ID          "uniqId"
+                 , 'USR01'          	"userTy"
+                 , A.MBER_ID          	"mberId"
+                 , A.MBER_NM          	"mberNm"
+                 , A.MBER_STTUS       	"mberSttus"
+                 , A.MBTLNUM      		"moblphonNo"
+				 , B.FUNCTION_CODE    	"functionCode"
+			 	 , COALESCE((SELECT DEPT_NM FROM TN_CMMN_DEPT D WHERE D.DEPT_ID = A.DEPT_ID), '부서미지정') "deptNm"
+		 		 , FNCCOMCODENM(A.JBTTL_ID, 'schdl_mng001')  "jbttlNm"
+				 , FNCCOMCODENM(A.OFCPS_ID, 'COM105') 	"ofcpsNm"
+				 , A.BRDT								"brdt"
+				 , A.JNCMP_YMD							"jncmpYmd"
+				 , A.WORK_STLE							"workStle"
+				 , C.CRQFC_ID							"crqfcId"
+				 , C.CRQFC_NM							"crqfcNm"
+				 , C.CRQFC_ISSUINST						"crqfcIssuinst"
+				 , TRIM(C.CRQFC_UPDT_YMD)               "crqfcUpdtYmd"
+			 	 , TRIM(C.CRQFC_ISSU_YMD) 				"crqfcIssuYmd"
+				 , C.RM									"rm"
+			 	 , C.EMP_ID								"empId"
+            FROM COMTNGNRLMBER A
+                 LEFT OUTER JOIN TNFUNCTIONAUTHOINFO B
+	        	   ON B.USER_ID = A.ESNTL_ID
+	        	 LEFT OUTER JOIN TN_EMP_CRQFC_MNG C
+	        	   ON C.EMP_ID = A.ESNTL_ID
+            WHERE ESNTL_ID=#{uniqId}
+    </select>
+
+    <update id="updateMber_S">
+
+            UPDATE COMTNGNRLMBER
+            SET
+	            	MBER_ID          = #{mberId}
+	            <if test="passwordHint != null and passwordHint != ''">
+	                , PASSWORD_HINT    = #{passwordHint}
+            	</if>
+            	<if test="password != null and password != ''">
+	                , PASSWORD    = #{password}
+            	</if>
+            	<if test="mberNm != null and mberNm != ''">
+	                , MBER_NM          = #{mberNm}
+            	</if>
+            	<if test="passwordCnsr != null and passwordCnsr != ''">
+	                , PASSWORD_CNSR    = #{passwordCnsr}
+            	</if>
+            	<if test="ihidnum != null and ihidnum != ''">
+	                , IHIDNUM          = #{ihidnum}
+            	</if>
+            	<if test="sexdstnCode != null and sexdstnCode != ''">
+	                , SEXDSTN_CODE     = #{sexdstnCode}
+            	</if>
+            	<if test="zip != null and zip != ''">
+	                , ZIP              = #{zip}
+            	</if>
+            	<if test="adres != null and adres != ''">
+	                , ADRES            = #{adres}
+            	</if>
+            	<if test="areaNo != null and areaNo != ''">
+	                , AREA_NO          = #{areaNo}
+            	</if>
+            	<if test="mberSttus != null and mberSttus != ''">
+	                , MBER_STTUS       = #{mberSttus}
+            	</if>
+            	<if test="detailAdres != null and detailAdres != ''">
+	                , DETAIL_ADRES     = #{detailAdres}
+            	</if>
+            	<if test="endTelno != null and endTelno != ''">
+	                , END_TELNO        = #{endTelno}
+            	</if>
+            	<if test="moblphonNo != null and moblphonNo != ''">
+	                , MBTLNUM      = #{moblphonNo}
+            	</if>
+            	<if test="groupId != null and groupId != ''">
+	                , GROUP_ID         = #{groupId}
+            	</if>
+            	<if test="mberFxnum != null and mberFxnum != ''">
+	                , MBER_FXNUM       = #{mberFxnum}
+            	</if>
+            	<if test="mberEmailAdres != null and mberEmailAdres != ''">
+	                , MBER_EMAIL_ADRES = #{mberEmailAdres}
+            	</if>
+            	<if test="middleTelno != null and middleTelno != ''">
+	                , MIDDLE_TELNO     = #{middleTelno}
+            	</if>
+            	<if test="cmpnyId != null and cmpnyId != ''">
+	                , CMPNY_ID     = #{cmpnyId}
+            	</if>
+            	<if test="deptId != null and deptId != ''">
+	                , DEPT_ID     = #{deptId}
+            	</if>
+            	<if test="ofcpsId != null and ofcpsId != ''">
+	                , OFCPS_ID     = #{ofcpsId}
+            	</if>
+            	<if test="fileId != null and fileId != ''">
+                	, FILE_ID     = #{fileId}
+            	</if>
+            	<if test="jbttlId != null and jbttlId != ''">
+                	, JBTTL_ID     = #{jbttlId}
+            	</if>
+            	<if test="brdt != null and brdt != ''">
+                	, BRDT     = #{brdt}
+            	</if>
+            	<if test="jncmpYmd != null and jncmpYmd != ''">
+                	, JNCMP_YMD     = #{jncmpYmd}
+            	</if>
+            	<if test="workStle != null and workStle != ''">
+                	, WORK_STLE     = #{workStle}
+            	</if>
+            WHERE ESNTL_ID=#{uniqId}
+
+    </update>
+
+    <select id="selectStplat_S" resultMap="stplatMap">
+
+            SELECT
+                USE_STPLAT_ID           ,
+                USE_STPLAT_CN           ,
+                INFO_PROVD_AGRE_CN
+            FROM COMTNSTPLATINFO
+            WHERE USE_STPLAT_ID=#{stplatId}
+
+    </select>
+
+    <update id="updatePassword_S">
+            UPDATE COMTNGNRLMBER
+            SET
+                   PASSWORD   =  #{password}
+            WHERE  ESNTL_ID  = #{uniqId}
+    </update>
+
+    <select id="selectPassword_S" resultType="egovframework.com.uss.umt.service.MberManageVO">
+
+            SELECT
+                    PASSWORD          "password"
+            FROM    COMTNGNRLMBER
+            WHERE   ESNTL_ID=#{uniqId}
+
+    </select>
+
+    <update id="mberSttusUpdate" parameterType="egovframework.com.uss.umt.service.MberManageVO">
+    	UPDATE COMTNGNRLMBER SET
+    	MBER_STTUS = 'D'
+    	WHERE ESNTL_ID = #{uniqId}
+    </update>
+
+    <!-- 메뉴에 관한 기능 조회 -->
+    <select id="selectMenuFunctionInfo" resultMap="menuFunctionInfoMap">
+		 SELECT A.MENU_NO
+		      , A.MENU_NM
+		      , D.FUNCTION_CODE
+		      , D.FUNCTION_NM
+		      , D.FUNCTION_MENU_NM
+		      , D.FUNCTION_MENU_NO
+		   FROM TNMENUINFO A
+		        , (
+	 	     		 SELECT B.MENU_NM AS FUNCTION_MENU_NM
+		           		  , B.MENU_NO AS FUNCTION_MENU_NO
+		          		  , C.FUNCTION_CODE
+		          		  , C.FUNCTION_NM
+		       		   FROM TNMENUINFO B
+			    			INNER JOIN TNMENUFUNCTIONINFO C
+			       			   ON C.MENU_NO = B.MENU_NO
+		      		  WHERE 1 = 1
+		        		AND B.MENU_GB = 'U'
+                   ) D
+		 WHERE 1 = 1
+		   AND A.MENU_GB = 'U'
+		   AND A.UPPER_MENU_NO = 'ROOT'
+		 ORDER BY A.MENU_ORDR, D.FUNCTION_CODE
+    </select>
+
+    <!-- 사용자에 대한 기능 권한 삭제 -->
+    <delete id="deleteFunctionAutho" parameterType="egovframework.com.uss.umt.service.MberManageVO">
+		DELETE FROM TNFUNCTIONAUTHOINFO
+		 WHERE USER_ID = #{uniqId}
+    </delete>
+
+    <!-- 사용자에 따른 기능 권한 등록 -->
+    <insert id="insertFunctionAutho" parameterType="FunctionAuthoInfoVO">
+            INSERT INTO TNFUNCTIONAUTHOINFO (
+				FNC_AUTHOR_SEQ
+				, USER_ID
+				, FUNCTION_CODE
+				, MENU_NO
+				, FRST_REGISTER_ID
+				, FRST_REGIST_PNTTM
+			)
+			VALUES (
+				#{fncAuthorSeq}
+				, #{userId}
+				, #{functionCode}
+				, #{menuNo.menuNo}
+				, #{frstRegisterId}
+				, NOW()
+			)
+    </insert>
+
+    <!-- 사용자에 대한 기능 권한 삭제 -->
+    <delete id="deleteCrqfcMng" parameterType="java.lang.String">
+		DELETE FROM TN_EMP_CRQFC_MNG
+		 WHERE EMP_ID = #{delId}
+    </delete>
+
+    <!-- 사용자에 따른 기능 권한 등록 -->
+    <insert id="insertCrqfcMng" parameterType="CrqfcMngVO">
+            INSERT INTO TN_EMP_CRQFC_MNG (
+				CRQFC_ID
+				, CRQFC_NM
+				, CRQFC_ISSUINST
+				, CRQFC_UPDT_YMD
+				, CRQFC_ISSU_YMD
+				, RM
+				, EMP_ID
+				, RGTR_ID
+				, REG_DT
+				, MDFR_ID
+				, MDFCN_DT
+			)
+			VALUES (
+				#{crqfcId}
+				, #{crqfcNm}
+				, #{crqfcIssuinst}
+				, #{crqfcUpdtYmd}
+				, #{crqfcIssuYmd}
+				, #{rm}
+				, #{empId}
+				, #{rgtrId}
+				, NOW()
+				, #{mdfrId}
+				, NOW()
+			)
+    </insert>
+</mapper>

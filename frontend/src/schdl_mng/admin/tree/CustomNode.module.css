@@ -1,0 +1,62 @@
+.root {
+    align-items: center;
+    display: flex;
+
+    height: 32px;
+    padding-inline-end: 1px;
+}
+
+.root.isHovered {
+    text-decoration: none;
+    background: #f6f6f6;
+    border: 1px #dadada solid;
+}
+
+.root.isSelected {
+    background-color: #dbe0f5;
+    border: 1px #b8c3e6 solid;
+    opacity: 0.8;
+}
+
+.expandIconWrapper {
+    align-items: center;
+    font-size: 0;
+    cursor: pointer;
+    display: flex;
+    height: 24px;
+    justify-content: center;
+    width: 24px;
+}
+
+.expandIconWrapper div {
+    background-image: url(/src/images/user/icon_plus.svg);
+    width: 11px;
+    height: 11px;
+    background-position: 50% 50% !important;
+    background-size: contain !important;
+    vertical-align: top;
+    background-repeat: no-repeat;
+}
+
+.expandIconWrapper.isOpen div {
+    background-image: url(/src/images/user/icon_minus.svg);
+}
+
+.labelGridItem {
+    padding-inline-start: 8px;
+}
+
+.actionButton {
+    padding: 0 4px;
+    width: 31.25px;
+    display: inline-block;
+}
+
+@media screen and (-ms-high-contrast: active), (-ms-high-contrast: none) {
+    .root {
+        display: flex;
+    }
+    .nodeIcon {
+        margin-right: 5px;
+    }
+}

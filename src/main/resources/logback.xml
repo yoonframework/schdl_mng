@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<property name="LOGS_PATH" value="/data/apache-tomcat-instance/schdl_mng/logs" /> <!--로그 파일 저장 위치 -->
+	<appender name="STDOUT"
+		class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>[%d{yyyy-MM-dd HH:mm:ss.SSS}] - %msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="DAILY_ROLLING_FILE_APPENDER"
+		class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>${LOGS_PATH}/schdl_mng.log</file>
+		<encoder>
+			<pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread]
+				%-5level%logger{35} - %msg%n</pattern>
+		</encoder>
+		<rollingPolicy
+			class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>${LOGS_PATH}/logback.%d{yyyy-MM-dd}.%i.log.gz
+			</fileNamePattern>
+			<timeBasedFileNamingAndTriggeringPolicy
+				class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+				<maxFileSize>5MB</maxFileSize>
+			</timeBasedFileNamingAndTriggeringPolicy>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<logger name="java.sql" level="ERROR" />
+	<logger name="egovframework" level="ERROR" />
+	<logger name="jdbc.sqltiming" level="ERROR" />
+	<logger name="jdbc.audit" level="ERROR" />
+	<logger name="jdbc.resultset" level="INFO" />
+	<logger name="org.springframework" level="ERROR" />
+	<logger name="jdbc.sqlonly" level="INFO" />
+	<logger name="jdbc.resultsettable" level="ERROR" />
+	<root level="ERROR">
+		<appender-ref ref="STDOUT" />
+		<!-- <appender-ref ref="DAILY_ROLLING_FILE_APPENDER" /> -->
+	</root>
+</configuration>

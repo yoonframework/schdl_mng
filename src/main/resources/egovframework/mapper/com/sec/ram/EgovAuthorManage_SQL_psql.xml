@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="authorManageDAO">
+
+    <resultMap id="author" type="egovframework.com.sec.ram.service.AuthorManageVO">
+        <result property="authorCode" column="AUTHOR_CODE"/>
+        <result property="authorNm" column="AUTHOR_NM"/>
+        <result property="authorDc" column="AUTHOR_DC"/>
+        <result property="authorCreatDe" column="AUTHOR_CREAT_DE"/>
+    </resultMap>
+
+    <select id="selectAuthorList" parameterType="egovframework.com.sec.ram.service.AuthorManageVO" resultMap="author">
+            SELECT
+                   AUTHOR_CODE, AUTHOR_NM, AUTHOR_DC, AUTHOR_CREAT_DE
+              FROM COMTNAUTHORINFO
+             WHERE 1=1
+            <if test="searchCondition == 1">AND
+                AUTHOR_NM LIKE CONCAT('%' , #{searchKeyword}, '%')
+            </if>
+            <!-- 게시판 등록 시 필요없는 권한 제외 -->
+            <if test="searchCondition == 999">AND
+                AUTHOR_CODE NOT IN ('ROLE_RESTRICTED','ROLE_ANONYMOUS','IS_AUTHENTICATED_ANONYMOUSLY','IS_AUTHENTICATED_FULLY','IS_AUTHENTICATED_REMEMBERED','ROLE_DISTEACHER')
+            </if>
+			<!-- 일반업체, 제품 판매업체, 기술판매업체, 우수업체 포함 -->
+			<if test="searchCondition == 998">
+				AND AUTHOR_CODE IN ('ROLE_ENTRPS', 'ROLE_PRDUCT', 'ROLE_TCHNLGY', 'ROLE_EXFI')
+			</if>
+			<!-- 게시판 등록 시 필요없는 권한, 일반업체, 제품 판매업체, 기술판매업체, 우수업체 제외 -->
+			<if test="searchCondition == 997">AND
+                AUTHOR_CODE NOT IN ('ROLE_RESTRICTED','ROLE_ANONYMOUS','IS_AUTHENTICATED_ANONYMOUSLY','IS_AUTHENTICATED_FULLY','IS_AUTHENTICATED_REMEMBERED','ROLE_DISTEACHER','ROLE_ENTRPS','ROLE_PRDUCT','ROLE_TCHNLGY','ROLE_EXFI','ROLE_USER')
+            </if>
+            ORDER BY AUTHOR_CREAT_DE DESC
+            <if test="pagingAt == true">
+            	LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+            </if>
+    </select>
+
+    <insert id="insertAuthor" parameterType="egovframework.com.sec.ram.service.AuthorManage">
+
+            INSERT INTO COMTNAUTHORINFO
+                  ( AUTHOR_CODE
+                  , AUTHOR_NM
+                  , AUTHOR_DC
+                  , AUTHOR_CREAT_DE )
+           VALUES ( #{authorCode}
+                  , #{authorNm}
+                  , #{authorDc}
+                  , to_char(now(), 'YYYY-mm-dd')
+                  )
+    </insert>
+
+    <update id="updateAuthor" parameterType="egovframework.com.sec.ram.service.AuthorManage">
+
+            UPDATE COMTNAUTHORINFO
+               SET AUTHOR_NM=#{authorNm}
+                 , AUTHOR_DC=#{authorDc}
+             WHERE AUTHOR_CODE=#{authorCode}
+
+    </update>
+
+    <delete id="deleteAuthor">
+
+            DELETE FROM COMTNAUTHORINFO
+             WHERE AUTHOR_CODE=#{authorCode}
+
+    </delete>
+
+    <select id="selectAuthor" resultMap="author">
+
+            SELECT AUTHOR_CODE, AUTHOR_NM, AUTHOR_DC, AUTHOR_CREAT_DE
+              FROM COMTNAUTHORINFO
+             WHERE AUTHOR_CODE=#{authorCode}
+
+    </select>
+
+    <select id="selectAuthorListTotCnt" parameterType="egovframework.com.sec.ram.service.AuthorManageVO" resultType="int">
+            SELECT COUNT(*) totcnt
+            FROM COMTNAUTHORINFO
+            WHERE 1=1
+            <if test="searchCondition == 1">AND
+                AUTHOR_NM LIKE CONCAT('%' , #{searchKeyword}, '%')
+            </if>
+    </select>
+
+    <select id="selectAuthorAllList" parameterType="egovframework.com.sec.ram.service.AuthorManageVO" resultMap="author">
+            SELECT
+                   AUTHOR_CODE, AUTHOR_NM, AUTHOR_DC, AUTHOR_CREAT_DE
+              FROM COMTNAUTHORINFO
+    </select>
+</mapper>

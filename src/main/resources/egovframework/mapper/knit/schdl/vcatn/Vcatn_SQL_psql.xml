@@ -1,0 +1,269 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="vcatnDAO">
+
+	<!-- 휴가 맵 -->
+	<resultMap id="mapVcatn" type="VcatnVO">
+		<id property="vcatnId" column="VCATN_ID"/>				<!-- 휴가 ID -->
+		<result property="aplcntId" column="APLCNT_ID"/>		<!-- 휴가 신청자 ID -->
+		<result property="aplcntNm" column="APLCNT_NM"/>		<!-- 휴가 신청자명 -->
+		<result property="bgngYmd" column="BGNG_YMD"/>			<!-- 휴가 시작일자 -->
+		<result property="endYmd" column="END_YMD"/>			<!-- 휴가 종료일자 -->
+		<result property="vcatnSe" column="VCATN_SE"/>			<!-- 휴가 구분 -->
+		<result property="vcatnSeNm" column="VCATN_SE_NM"/>		<!-- 휴가 구분명 -->
+		<result property="vcatnCn" column="VCATN_CN"/>			<!-- 휴가 내용 -->
+		<result property="regDt" column="REG_DT"/>				<!-- 휴가 등록일시 -->
+		<result property="rgtrId" column="RGTR_ID"/>			<!-- 휴가 등록자 ID -->
+		<result property="mdfcnDt" column="MDFCN_DT"/>			<!-- 휴가 수정일시 -->
+		<result property="mdfrId" column="MDFR_ID"/>			<!-- 휴가 수정자 ID -->
+		<result property="deptId" column="DEPT_ID"/>			<!-- 휴가 신청자 부서 ID -->
+		<result property="deptNm" column="DEPT_NM"/>			<!-- 휴가 신청자 부서명 -->
+		<result property="ofcpsId" column="OFCPS_ID"/>			<!-- 휴가 신청자 직위 ID -->
+		<result property="ofcpsNm" column="OFCPS_NM"/>			<!-- 휴가 신청자 직위명 -->
+		<result property="rmndrDayCnt" column="RMNDR_DAY_CNT"/>	<!-- 휴가 - 신청자의 휴가 남은 일수 -->
+		<result property="dayCnt" column="DAY_CNT"/>			<!-- 휴가 - 신청자 휴가 일수 -->
+	</resultMap>
+
+	<!-- 휴가 등록 - 사용자 휴가 남은 일수 조회 -->
+	<select id="selectRmndrDayCnt" parameterType="java.lang.String" resultType="java.lang.String">
+		SELECT RMNDR_DAY_CNT
+		  FROM VNVCATNINFO
+		 WHERE 1=1
+		   AND ESNTL_ID = #{uniqId}
+	</select>
+
+	<!-- 휴가 등록 - 사용자 지정 일자에 휴가 등록 여부 확인 -->
+	<select id="selectVcatnRegYn" parameterType="VcatnVO" resultType="java.lang.Integer">
+		SELECT SUM(T.CNT) AS SM
+		  FROM (
+		  		SELECT '출장' AS TYPE , COUNT(*) AS CNT
+				  FROM (
+				  		SELECT B.BSRP_ID
+							 , B.APLCNT_ID
+							 , CASE WHEN TO_CHAR(TO_TIMESTAMP(A.BGNG_DT, 'YYYYMMDDHH24MISS'), 'YYYYMMDD') = B.DATE_STRING
+							 		THEN CONCAT(B.DATE_STRING, TO_CHAR(TO_TIMESTAMP(A.BGNG_DT, 'YYYYMMDDHH24MISS'), 'HH24MISS'))
+							 		ELSE CONCAT(B.DATE_STRING, '090000')
+							 	END AS BGNG_DT
+							 , CASE WHEN TO_CHAR(TO_TIMESTAMP(A.END_DT, 'YYYYMMDDHH24MISS'), 'YYYYMMDD') = B.DATE_STRING
+							 		THEN CONCAT(B.DATE_STRING, TO_CHAR(TO_TIMESTAMP(A.END_DT, 'YYYYMMDDHH24MISS'), 'HH24MISS'))
+							 		ELSE CONCAT(B.DATE_STRING, '180000')
+							 	END AS END_DT
+						  FROM TN_SCHDL_BSRP A
+						  	   RIGHT OUTER JOIN (
+								  	SELECT BSRP_ID
+								  		 , APLCNT_ID
+										 , TO_CHAR(DATE(GENERATE_SERIES(TO_DATE(BGNG_DT, 'YYYYMMDDHH24MISS'), TO_DATE(END_DT, 'YYYYMMDDHH24MISS'), '1 DAY')), 'YYYYMMDD') AS DATE_STRING
+									  FROM TN_SCHDL_BSRP
+									 WHERE 1=1
+						  ) B
+						  		  ON A.BSRP_ID = B.BSRP_ID
+				  ) BSRP
+				 WHERE 1=1
+				   AND BSRP.APLCNT_ID = #{aplcntId}
+				   <![CDATA[
+				   AND (
+				   			(
+					   			TO_TIMESTAMP(CONCAT(#{bgngYmd}, (SELECT CASE WHEN #{vcatnSe} = '03' THEN '140000' ELSE '090000' END AS TIME)), 'YYYYMMDDHH24MISS') BETWEEN TO_TIMESTAMP(BSRP.BGNG_DT, 'YYYYMMDDHH24MISS') AND TO_TIMESTAMP(BSRP.END_DT, 'YYYYMMDDHH24MISS')
+								OR
+								TO_TIMESTAMP(CONCAT(#{endYmd}, (SELECT CASE WHEN #{vcatnSe} = '02' THEN '140000' ELSE '180000' END AS TIME)), 'YYYYMMDDHH24MISS') BETWEEN TO_TIMESTAMP(BSRP.BGNG_DT, 'YYYYMMDDHH24MISS') AND TO_TIMESTAMP(BSRP.END_DT, 'YYYYMMDDHH24MISS')
+							)
+							OR
+							(
+								TO_TIMESTAMP(BSRP.BGNG_DT, 'YYYYMMDDHH24MISS') BETWEEN TO_TIMESTAMP(CONCAT(#{bgngYmd}, (SELECT CASE WHEN #{vcatnSe} = '03' THEN '140000' ELSE '090000' END AS TIME)), 'YYYYMMDDHH24MISS') AND TO_TIMESTAMP(CONCAT(#{endYmd}, (SELECT CASE WHEN #{vcatnSe} = '02' THEN '140000' ELSE '180000' END AS TIME)), 'YYYYMMDDHH24MISS')
+								OR
+								TO_TIMESTAMP(BSRP.END_DT, 'YYYYMMDDHH24MISS') BETWEEN TO_TIMESTAMP(CONCAT(#{bgngYmd}, (SELECT CASE WHEN #{vcatnSe} = '03' THEN '140000' ELSE '090000' END AS TIME)), 'YYYYMMDDHH24MISS') AND TO_TIMESTAMP(CONCAT(#{endYmd}, (SELECT CASE WHEN #{vcatnSe} = '02' THEN '140000' ELSE '180000' END AS TIME)), 'YYYYMMDDHH24MISS')
+							)
+				   	)
+					]]>
+				 UNION ALL
+				SELECT '휴가' AS TYPE , COUNT(*) AS CNT
+				  FROM (
+				  		SELECT VCATN.APLCNT_ID, VCATN.VCATN_SE, CONCAT(VCATN.DATE_STRING, CD.START_TIME) AS BGNG_DT, CONCAT(VCATN.DATE_STRING, CD.END_TIME) AS END_DT
+						  FROM (
+						  		SELECT VCATN_ID, APLCNT_ID, VCATN_SE, TO_CHAR(DATE(GENERATE_SERIES(TO_DATE(BGNG_YMD, 'YYYYMMDD'), TO_DATE(END_YMD, 'YYYYMMDD'), '1 DAY')), 'YYYYMMDD') AS DATE_STRING
+								  FROM TN_SCHDL_VCATN
+								 WHERE 1=1
+						  ) VCATN
+						  	   INNER JOIN (
+						  	   		SELECT CODE
+						  	   			 , CASE WHEN CODE = '03'
+						  	   			 		THEN '140000'
+						  	   			 		ELSE '090000'
+						  	   			 	END AS START_TIME
+						  	   			 , CASE WHEN CODE = '02'
+						  	   			 		THEN '140000'
+						  	   			 		ELSE '180000'
+						  	   			 	END AS END_TIME
+						  	   		  FROM COMTCCMMNDETAILCODE
+						  	   		 WHERE 1=1
+						  	   		   AND CODE_ID = 'COM056'
+						  	   ) CD
+						  	      ON VCATN.VCATN_SE = CD.CODE
+						 WHERE 1=1
+				  ) VCATN_DATE
+				 WHERE 1=1
+				   AND VCATN_DATE.APLCNT_ID = #{aplcntId}
+				   <![CDATA[
+				   AND (
+				   			(
+					   			TO_TIMESTAMP(CONCAT(#{bgngYmd}, (SELECT CASE WHEN #{vcatnSe} = '03' THEN '140000' ELSE '090000' END AS TIME)), 'YYYYMMDDHH24MISS') BETWEEN TO_TIMESTAMP(VCATN_DATE.BGNG_DT, 'YYYYMMDDHH24MISS') AND TO_TIMESTAMP(VCATN_DATE.END_DT, 'YYYYMMDDHH24MISS')
+								OR
+								TO_TIMESTAMP(CONCAT(#{endYmd}, (SELECT CASE WHEN #{vcatnSe} = '02' THEN '140000' ELSE '180000' END AS TIME)), 'YYYYMMDDHH24MISS') BETWEEN TO_TIMESTAMP(VCATN_DATE.BGNG_DT, 'YYYYMMDDHH24MISS') AND TO_TIMESTAMP(VCATN_DATE.END_DT, 'YYYYMMDDHH24MISS')
+							)
+							OR
+							(
+								TO_TIMESTAMP(VCATN_DATE.BGNG_DT, 'YYYYMMDDHH24MISS') BETWEEN TO_TIMESTAMP(CONCAT(#{bgngYmd}, (SELECT CASE WHEN #{vcatnSe} = '03' THEN '140000' ELSE '090000' END AS TIME)), 'YYYYMMDDHH24MISS') AND TO_TIMESTAMP(CONCAT(#{endYmd}, (SELECT CASE WHEN #{vcatnSe} = '02' THEN '140000' ELSE '180000' END AS TIME)), 'YYYYMMDDHH24MISS')
+								OR
+								TO_TIMESTAMP(VCATN_DATE.END_DT, 'YYYYMMDDHH24MISS') BETWEEN TO_TIMESTAMP(CONCAT(#{bgngYmd}, (SELECT CASE WHEN #{vcatnSe} = '03' THEN '140000' ELSE '090000' END AS TIME)), 'YYYYMMDDHH24MISS') AND TO_TIMESTAMP(CONCAT(#{endYmd}, (SELECT CASE WHEN #{vcatnSe} = '02' THEN '140000' ELSE '180000' END AS TIME)), 'YYYYMMDDHH24MISS')
+							)
+				   	)
+					]]>
+		  ) T
+		 WHERE 1=1
+	</select>
+
+	<!-- 휴가 등록 -->
+	<insert id="insertVcatn" parameterType="VcatnVO">
+		INSERT INTO TN_SCHDL_VCATN (
+			VCATN_ID
+			, APLCNT_ID
+			, BGNG_YMD
+			, END_YMD
+			, VCATN_SE
+			, VCATN_CN
+			, REG_DT
+			, RGTR_ID
+			, MDFCN_DT
+			, MDFR_ID
+		) VALUES (
+			#{vcatnId}
+	        , #{aplcntId}
+	        , #{bgngYmd}
+	        , #{endYmd}
+	        , #{vcatnSe}
+	        , #{vcatnCn}
+	        , NOW()
+	        , #{rgtrId}
+	        , NOW()
+	        , #{mdfrId}
+		)
+	</insert>
+
+	<!-- 휴가 수정 -->
+	<update id="updateVcatn" parameterType="VcatnVO">
+		UPDATE TN_SCHDL_VCATN
+		   SET VCATN_CN = #{vcatnCn}
+		     , MDFR_ID = #{mdfrId}
+		     , MDFCN_DT = NOW()
+		 WHERE 1=1
+		   AND VCATN_ID = #{vcatnId}
+	</update>
+
+	<!-- 휴가 삭제 -->
+	<delete id="deleteVcatn" parameterType="VcatnVO">
+		DELETE FROM TN_SCHDL_VCATN
+		 WHERE 1=1
+		   AND VCATN_ID = #{vcatnId}
+	</delete>
+
+	<!-- 휴가 목록 조회 -->
+	<select id="selectVcatnList" parameterType="VcatnVO" resultMap="mapVcatn">
+		SELECT A.VCATN_ID
+			 , A.APLCNT_ID
+			 , A.BGNG_YMD AS BGNG_YMD
+			 , A.END_YMD AS END_YMD
+			 , A.VCATN_SE
+			 , FNCCOMCODENM(A.VCATN_SE, 'COM056') AS VCATN_SE_NM
+			 , A.VCATN_CN
+			 , A.REG_DT
+			 , A.RGTR_ID
+			 , A.MDFCN_DT
+			 , A.MDFR_ID
+			 , B.USER_NM AS APLCNT_NM
+			 , B.DEPT_ID
+			 , B.OFCPS_ID
+			 , FNCCOMCODENM(B.OFCPS_ID, 'COM105') AS OFCPS_NM
+			 , C.DEPT_NM
+			 , E.RMNDR_DAY_CNT
+			 , TO_DATE(A.END_YMD, 'YYYYMMDD') - TO_DATE(A.BGNG_YMD, 'YYYYMMDD') + 1 AS DAY_CNT
+		  FROM (
+		  			SELECT VCATN_ID
+						 , APLCNT_ID
+						 , BGNG_YMD AS BGNG_YMD
+						 , END_YMD AS END_YMD
+						 , VCATN_SE
+						 , VCATN_CN
+						 , REG_DT
+						 , RGTR_ID
+						 , MDFCN_DT
+						 , MDFR_ID
+		  			  FROM TN_SCHDL_VCATN
+		  			 WHERE 1=1
+		  			   AND APLCNT_ID = #{aplcntId}
+		  			    <if test="vcatnSe != null and vcatnSe != ''">
+							AND VCATN_SE = #{vcatnSe}
+						</if>
+						<if test="vcatnCn != null and vcatnCn != ''">
+							AND REPLACE(VCATN_CN, ' ', '') LIKE CONCAT ('%', REPLACE(#{vcatnCn}, ' ', ''), '%')
+						</if>
+						<if test="bgngYmd != null and bgngYmd != '' and endYmd != null and endYmd != ''">
+							AND (
+								TO_DATE(BGNG_YMD, 'YYYYMMDD') BETWEEN TO_DATE(#{bgngYmd}, 'YYYYMMDD') AND TO_DATE(#{endYmd}, 'YYYYMMDD')
+								OR
+								TO_DATE(END_YMD, 'YYYYMMDD') BETWEEN TO_DATE(#{bgngYmd}, 'YYYYMMDD') AND TO_DATE(#{endYmd}, 'YYYYMMDD')
+							)
+						</if>
+						<if test="bgngYmd != null and bgngYmd != '' and (endYmd == null or endYmd == '')">
+							<![CDATA[
+								AND TO_DATE(#{bgngYmd}, 'YYYYMMDD') <= TO_DATE(BGNG_YMD, 'YYYYMMDD')
+							]]>
+						</if>
+						<if test="(bgngYmd == null or bgngYmd == '') and endYmd != null and endYmd != ''">
+							<![CDATA[
+								AND TO_DATE(#{endYmd}, 'YYYYMMDD') >= TO_DATE(END_YMD, 'YYYYMMDD')
+							]]>
+						</if>
+		  			 ORDER BY TO_DATE(BGNG_YMD, 'YYYYMMDD') DESC, VCATN_ID DESC
+		  			 LIMIT #{recordCountPerPage} OFFSET #{firstIndex}
+		  		) A
+		  	   INNER JOIN COMVNUSERMASTER B
+		  	      ON A.APLCNT_ID = B.ESNTL_ID
+		  	    LEFT JOIN TN_CMMN_DEPT C
+		  	      ON B.DEPT_ID = C.DEPT_ID
+		  	   	LEFT JOIN VNVCATNINFO E
+		  	      ON A.APLCNT_ID = E.ESNTL_ID
+		 WHERE 1=1
+		 ORDER BY TO_DATE(A.BGNG_YMD, 'YYYYMMDD') DESC, A.VCATN_ID DESC
+	</select>
+
+	<!-- 휴가 목록 건수 조회 -->
+	<select id="selectVcatnListTotCnt" parameterType="VcatnVO" resultType="java.lang.Integer">
+		SELECT COUNT(*) AS CNT
+		  FROM TN_SCHDL_VCATN
+		 WHERE 1=1
+		   AND APLCNT_ID = #{aplcntId}
+		<if test="vcatnSe != null and vcatnSe != ''">
+			AND VCATN_SE = #{vcatnSe}
+		</if>
+		<if test="vcatnCn != null and vcatnCn != ''">
+			AND REPLACE(VCATN_CN, ' ', '') LIKE CONCAT ('%', REPLACE(#{vcatnCn}, ' ', ''), '%')
+		</if>
+		<if test="bgngYmd != null and bgngYmd != '' and endYmd != null and endYmd != ''">
+			AND (
+				TO_DATE(BGNG_YMD, 'YYYYMMDD') BETWEEN TO_DATE(#{bgngYmd}, 'YYYYMMDD') AND TO_DATE(#{endYmd}, 'YYYYMMDD')
+				OR
+				TO_DATE(END_YMD, 'YYYYMMDD') BETWEEN TO_DATE(#{bgngYmd}, 'YYYYMMDD') AND TO_DATE(#{endYmd}, 'YYYYMMDD')
+			)
+		</if>
+		<if test="bgngYmd != null and bgngYmd != '' and (endYmd == null or endYmd == '')">
+			<![CDATA[
+				AND TO_DATE(#{bgngYmd}, 'YYYYMMDD') <= TO_DATE(BGNG_YMD, 'YYYYMMDD')
+			]]>
+		</if>
+		<if test="(bgngYmd == null or bgngYmd == '') and endYmd != null and endYmd != ''">
+			<![CDATA[
+				AND TO_DATE(#{endYmd}, 'YYYYMMDD') >= TO_DATE(END_YMD, 'YYYYMMDD')
+			]]>
+		</if>
+	</select>
+</mapper>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 25.2.2, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="레이어_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+	 y="0px" viewBox="0 0 107.8 117.3" style="enable-background:new 0 0 107.8 117.3;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#ABC5E3;stroke:#38393A;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+	.st1{fill:#FFFFFF;stroke:#38393A;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+	.st2{fill:none;stroke:#38393A;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+	.st3{fill:#FFFFFF;stroke:#38383B;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st4{fill:none;stroke:#38383B;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:10;}
+	.st5{fill:#ABC5E3;stroke:#365587;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round;}
+	.st6{fill:#DADAE0;}
+	.st7{fill:#FFFFFF;}
+</style>
+<g>
+	<path class="st4" d="M24.2,19.1V4.3c0-1.4,1.1-2.6,2.6-2.6h26.5c1.4,0,2.6,1.1,2.6,2.6v14.8"/>
+	<g>
+		<path class="st0" d="M68.1,41.6H12C6.4,41.6,1.8,37,1.8,31.3v40.3h76.6V31.3C78.3,37,73.7,41.6,68.1,41.6z"/>
+		<path class="st3" d="M1.8,31.3C1.8,37,6.4,41.6,12,41.6h56.1c5.6,0,10.2-4.6,10.2-10.2V17.6H1.8V31.3z"/>
+	</g>
+	<g>
+		<line class="st4" x1="25.7" y1="30.8" x2="29.8" y2="30.8"/>
+		<line class="st4" x1="33.9" y1="30.8" x2="38" y2="30.8"/>
+		<line class="st4" x1="42.1" y1="30.8" x2="46.2" y2="30.8"/>
+		<line class="st4" x1="50.2" y1="30.8" x2="54.3" y2="30.8"/>
+	</g>
+	<g>
+		<g>
+			<path class="st1" d="M56,48c-4.1,0-7.4,3.3-7.4,7.4v51.8c0-4.1,3.3-7.4,7.4-7.4h50V48H56z"/>
+			<path class="st1" d="M48.6,107.2v0.9c0,4.1,3.3,7.4,7.4,7.4h50V99.8H56C51.9,99.8,48.6,103.1,48.6,107.2z"/>
+		</g>
+		<line class="st1" x1="54.8" y1="108.2" x2="104.9" y2="108.2"/>
+		<line class="st1" x1="60.8" y1="48" x2="60.8" y2="99.2"/>
+		<rect x="70" y="58.7" class="st1" width="28.6" height="11.6"/>
+	</g>
+</g>
+</svg>

@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="MenuDAO">
+	<!-- 메뉴트리 맵 -->
+	<resultMap id="menuTreeMap" type="MenuTreeVO">
+		<id property="id" column="ID"/>
+		<result property="menuNo" column="MENU_NO"/>
+		<result property="upperMenuNo" column="UPPER_MENU_NO"/>
+		<result property="pId" column="PID"/>
+		<result property="name" column="MENU_NM"/>
+		<result property="menuOrdr" column="MENU_ORDR"/>
+		<result property="relateImage" column="RELATE_IMAGE"/>
+		<result property="progrGb" column="PROGR_GB"/>
+		<result property="menuGb" column="MENU_GB"/>
+		<result property="progrUrl" column="PROGR_URL"/>
+	</resultMap>
+
+	<!-- 메뉴 맵 -->
+	<resultMap id="menuMap" type="MenuVO">
+		<id property="menuNo" column="MENU_NO"/>
+		<result property="upperMenuNo" column="UPPER_MENU_NO"/>
+		<result property="menuNm" column="MENU_NM"/>
+		<result property="menuOrdr" column="MENU_ORDR"/>
+		<result property="menuDc" column="MENU_DC"/>
+		<result property="relateImage" column="RELATE_IMAGE"/>
+		<result property="progrGb" column="PROGR_GB"/>
+		<result property="menuGb" column="MENU_GB"/>
+		<result property="progrUrl" column="PROGR_URL"/>
+		<result property="childCnt" column="CHILD_CNT"/>
+	</resultMap>
+
+	<!-- 트리 생성을 위한 메뉴리스트 -->
+	<select id="selectMenuTreeList" resultMap="menuTreeMap">
+		SELECT A.MENU_NO AS ID
+		     , A.MENU_NO
+		     , A.UPPER_MENU_NO AS PID
+			 , A.UPPER_MENU_NO
+			 , A.MENU_NM
+			 , A.MENU_ORDR
+			 , A.RELATE_IMAGE
+			 , A.PROGR_GB
+			 , A.MENU_GB
+		  FROM TNMENUINFO A
+		 UNION ALL
+		SELECT 'ROOT'
+		     , 'ROOT'
+		     , NULL
+			 , NULL
+			 , 'ROOT'
+			 , 0
+			 , ''
+			 , ''
+			 , ''
+		 ORDER BY MENU_ORDR
+	</select>
+
+	<!-- 모든 메뉴 리스트 -->
+	<select id="selectAllMenuList" parameterType="MenuVO" resultMap="menuMap">
+		SELECT DISTINCT A.MENU_NO
+			, A.MENU_NM
+			, A.UPPER_MENU_NO
+			, A.MENU_ORDR
+			, A.MENU_GB
+			#, B.PROGR_URL
+			, FNCMENUDOWNURL(A.MENU_NO) AS PROGR_URL
+		FROM TNMENUINFO A
+			, TNMENUPROGRAMINFO B
+		WHERE A.MENU_NO = B.MENU_NO
+		AND A.USE_YN = 'Y'
+		AND B.DEFAULT_YN = 'Y'
+		ORDER BY A.MENU_ORDR
+	</select>
+
+	<!-- 권한에 따른 메뉴리스트 -->
+	<select id="selectSessionMenuList" parameterType="MenuVO" resultMap="menuMap">
+		SELECT DISTINCT A.MENU_NO
+			, A.MENU_NM
+			, A.UPPER_MENU_NO
+			, A.MENU_ORDR
+			, A.MENU_GB
+			#, B.PROGR_URL
+			, IF(B.PROGR_URL = 'dir', FNCMENUDOWNURL(A.MENU_NO), B.PROGR_URL) AS PROGR_URL
+			, (SELECT COUNT(*) FROM TNMENUINFO Z WHERE A.MENU_NO = Z.UPPER_MENU_NO) AS CHILD_CNT
+		FROM TNMENUINFO A
+			, TNMENUPROGRAMINFO B
+			, TNMENUAUTHOINFO C
+		WHERE A.MENU_NO = B.MENU_NO
+		AND B.DEFAULT_YN = 'Y'
+		AND B.MENU_NO = C.MENU_NO
+		AND B.PROGR_URL = C.PROGR_URL
+		AND (
+			<choose>
+				<when test="authorCodeList != null and authorCodeList != ''">
+					C.AUTHOR_CODE IN
+					<foreach collection="authorCodeList" item="code" open="(" close=")" separator=",">
+				 		#{code}
+					</foreach>
+					<if test="userId != null and userId != ''">
+						OR C.USER_ID = #{userId}
+					</if>
+				</when>
+				<otherwise>
+					C.AUTHOR_CODE = #{authorCode}
+					<if test="userId != null and userId != ''">
+						OR C.USER_ID = #{userId}
+					</if>
+				</otherwise>
+			</choose>
+		)
+		ORDER BY A.MENU_ORDR
+	</select>
+
+	<!-- 권한 체크 대상인지 조회 -->
+	<select id="selectMenuProgramCnt" parameterType="MenuVO" resultType="int">
+		SELECT	COUNT(*)
+		FROM	TNMENUPROGRAMINFO
+		WHERE	PROGR_URL = #{progrUrl}
+	</select>
+
+	<!-- 권한 체크(롤 and uniqId 로그인ID 아님) -->
+	<select id="selectAuthoUrlCheck" parameterType="MenuVO" resultType="int">
+		SELECT COUNT(*)
+		FROM TNMENUINFO A
+			, TNMENUPROGRAMINFO B
+			, TNMENUAUTHOINFO C
+		WHERE A.MENU_NO = B.MENU_NO
+		AND B.MENU_NO = C.MENU_NO
+		AND B.PROGR_URL = C.PROGR_URL
+		AND (
+			<choose>
+				<when test="authorCodeList != null and authorCodeList != ''">
+					C.AUTHOR_CODE IN
+					<foreach collection="authorCodeList" item="code" open="(" close=")" separator=",">
+				 		#{code}
+					</foreach>
+					<if test="userId != null and userId != ''">
+						OR C.USER_ID = #{userId}
+					</if>
+				</when>
+				<otherwise>
+					C.AUTHOR_CODE = #{authorCode}
+					<if test="userId != null and userId != ''">
+						OR C.USER_ID = #{userId}
+					</if>
+				</otherwise>
+			</choose>
+		)
+		AND B.PROGR_URL = #{progrUrl}
+	</select>
+
+	<!-- URL의 상위 정보 데이터 -->
+	<select id="selectMenuNaviList" parameterType="MenuVO" resultMap="menuMap">
+		<![CDATA[
+		SET @id := (SELECT MENU_NO FROM TNMENUPROGRAMINFO WHERE PROGR_URL = #{progrUrl} LIMIT 1);
+		SET @L := 0;
+
+		SELECT	A.MENU_NO
+				, A.UPPER_MENU_NO
+				, B.MENU_NM
+		FROM	(
+		SELECT @r AS MENU_NO
+		    , (SELECT @r := UPPER_MENU_NO FROM TNMENUINFO WHERE MENU_NO = @r LIMIT 1) AS UPPER_MENU_NO
+		    , (@L := @L + 1) AS LVL
+		FROM ( SELECT @r := @id) AS vars, (SELECT * FROM TNMENUINFO WHERE MENU_NO != @id ) AS h
+		WHERE @r <> 'ROOT'
+		) A, TNMENUINFO B
+		WHERE	A.MENU_NO = B.MENU_NO
+		AND		A.UPPER_MENU_NO <> 'ROOT'
+		ORDER BY LVL DESC
+		]]>
+	</select>
+	<!-- URL에 해당하는 메뉴 depth의 데이터 목록 -->
+	<select id="selectMenuSameDepthList" parameterType="MenuVO" resultMap="menuMap">
+		SELECT	DISTINCT A.PROGR_URL
+				, B.*
+		FROM	TNMENUPROGRAMINFO A
+		, (
+			SELECT 	A.MENU_NO
+					, A.MENU_NM
+				 	, A.MENU_ORDR
+			FROM	TNMENUINFO A
+			, (
+				SELECT	B.UPPER_MENU_NO
+				FROM	TNMENUPROGRAMINFO A
+						, TNMENUINFO B
+				WHERE	A.PROGR_URL = #{progrUrl}
+				AND		A.MENU_NO = B.MENU_NO
+			) B
+			WHERE	A.UPPER_MENU_NO = B.UPPER_MENU_NO
+			AND		A.USE_YN = 'Y'
+		) B
+		, TNMENUAUTHOINFO C
+		WHERE	A.MENU_NO = B.MENU_NO
+		AND		A.DEFAULT_YN = 'Y'
+		AND 	A.PROGR_URL = C.PROGR_URL
+		AND 	A.MENU_NO = C.MENU_NO
+		AND 	(
+			<choose>
+				<when test="authorCodeList != null and authorCodeList != ''">
+					C.AUTHOR_CODE IN
+					<foreach collection="authorCodeList" item="code" open="(" close=")" separator=",">
+				 		#{code}
+					</foreach>
+					<if test="userId != null and userId != ''">
+						OR C.USER_ID = #{userId}
+					</if>
+				</when>
+				<otherwise>
+					C.AUTHOR_CODE = #{authorCode}
+					<if test="userId != null and userId != ''">
+						OR C.USER_ID = #{userId}
+					</if>
+				</otherwise>
+			</choose>
+				)
+		ORDER	BY B.MENU_ORDR
+	</select>
+
+	<select id="selectUserFunctionList" parameterType="MenuVO" resultType="String">
+		SELECT	GROUP_CONCAT(FUNCTION_CODE) AS FUNCTION_CODE
+		FROM	TNFUNCTIONAUTHOINFO
+		WHERE	1 = 1
+		AND		USER_ID = #{userId}
+	</select>
+</mapper>
